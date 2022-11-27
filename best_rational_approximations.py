@@ -72,7 +72,8 @@ def find_approximations(alpha, parameters, convergents):
         if fraction in convergents:
             order = "II"
         else:
-            closest_convergent = max(filter(lambda a: a.order == "II", approximations), key=lambda a: a.fraction).fraction
+            closest_convergent = max(filter(lambda a: a.order == "II", approximations),
+                                     key=lambda a: a.fraction).fraction
             if abs_diff < abs(alpha - closest_convergent):
                 order = "I"
             else:
