@@ -9,6 +9,7 @@
 #                      and its absolute difference is larger than the one of its closest continuous fraction
 # 5. For those which are a best rational approximaition, save the absolute difference and calculate continuous digit representation
 
+import math
 
 def gather_parameters():
     prompt = "Please input a positive real number with a finite number of decimal digits: "
@@ -23,11 +24,17 @@ def gather_parameters():
 
 def generate_abbreviated_notation(alpha):
     i = 0
-    values = []
-    notation = []
-    diff = 0
+    values = [alpha]
+    notation = [math.floor(alpha)]
+    diff = 10
 
+    while diff != 0 and i < 10:
+        diff = values[i] - notation[i]
+        i += 1
+        values[i] = 1/diff
+        notation[i] = math.floor(values[i])
 
+    return notation
 
 
 if __name__ == '__main__':
@@ -35,3 +42,5 @@ if __name__ == '__main__':
     parameters = gather_parameters()
 
     abbreviated_notation = generate_abbreviated_notation(parameters[0])
+    print("Abbreviated notation of number " + str(parameters[0]) + ": " + str(abbreviated_notation))
+
