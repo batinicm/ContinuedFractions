@@ -12,11 +12,9 @@
 import math
 from fractions import Fraction
 from tabulate import tabulate
+from Approximation import Approximation
 
 NOTATION_COUNT = 10
-FRACTION = 1
-ORDER = 3
-ABS_DIFF = 4
 
 
 def gather_parameters():
@@ -56,7 +54,7 @@ def generate_convergents(abbreviated_notation):
 
 # Generate p using n <= q <= m, as floor(alpha * q), check if p/q is a convergent
 # yes -> best rational approximation of II order
-# no -> calculate absolute difference between fraction and alpha, find closest convergent
+# no -> calculate absolute difference between fraction and alpha, find closest previously found convergent
 # and see if absolute difference is smaller than the one of the convergent
 #   -> yes -> best rational approximation of I order
 #   -> no -> not of any order, unimportant
@@ -74,14 +72,14 @@ def find_approximations(alpha, parameters, convergents):
         if fraction in convergents:
             order = "II"
         else:
-            closest_convergent = max(filter(lambda a: a[ORDER] == "II", approximations))[FRACTION]
+            closest_convergent = max(filter(lambda a: a.order == "II", approximations), key=lambda a: a.fraction).fraction
             if abs_diff < abs(alpha - closest_convergent):
                 order = "I"
             else:
                 q += 1
                 continue
 
-        approximations.append([q, fraction, generate_abbreviated_notation(fraction), order, abs_diff])
+        approximations.append(Approximation(q, p, fraction, generate_abbreviated_notation(fraction), order, abs_diff))
         q += 1
 
     return approximations
@@ -90,8 +88,9 @@ def find_approximations(alpha, parameters, convergents):
 # Prints approximations sorted by absolute difference with alpha
 # Approximation details: q, p/q, notation, order, absolute difference
 def print_approximations(approximations):
-    approximations.sort(key=lambda a: a[ABS_DIFF])
-    print(tabulate(approximations, headers=["q", "p/q", "p/q = [a0;...]", "order", "abs_diff"], tablefmt="fancy_grid"))
+    approximations.sort(key=lambda a: a.abs_diff)
+    printable = list(map(lambda a: [a.q, str(a.p) + "/" + str(a.q), a.notation, a.order, a.abs_diff], approximations))
+    print(tabulate(printable, headers=["q", "p/q", "p/q = [a0;...]", "order", "abs_diff"], tablefmt="fancy_grid"))
 
 
 if __name__ == '__main__':
