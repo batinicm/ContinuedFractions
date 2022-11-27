@@ -14,7 +14,9 @@ from fractions import Fraction
 from tabulate import tabulate
 
 NOTATION_COUNT = 10
-ABS_DIFF = 3
+FRACTION = 1
+ORDER = 3
+ABS_DIFF = 4
 
 
 def gather_parameters():
@@ -28,14 +30,14 @@ def generate_abbreviated_notation(alpha):
     i = 0
     values = [alpha]
     notation = [math.floor(alpha)]
-    diff = 10
+    diff = values[i] - notation[i]
 
     while diff != 0 and i < NOTATION_COUNT:
-        diff = values[i] - notation[i]
         i += 1
         new_value = float(1 / diff)
         values.append(new_value)
         notation.append(math.floor(new_value))
+        diff = values[i] - notation[i]
 
     return notation
 
@@ -69,18 +71,14 @@ def find_approximations(alpha, parameters, convergents):
         fraction = Fraction(p, q)
         abs_diff = abs(alpha - fraction)
 
-        if q in list(map(lambda c: c.denominator, convergents)) and p in list(map(lambda c: c.numerator, convergents)):
-            order = 2
+        if fraction in convergents:
+            order = "II"
         else:
-            i = 0
-            for i in (0, len(convergents)):
-                if convergents[i] > fraction:
-                    break
-                i += 1
-            closest_convergent = convergents[i - 1]
+            closest_convergent = max(filter(lambda a: a[ORDER] == "II", approximations))[FRACTION]
             if abs_diff < abs(alpha - closest_convergent):
-                order = 1
+                order = "I"
             else:
+                q += 1
                 continue
 
         approximations.append([q, fraction, generate_abbreviated_notation(fraction), order, abs_diff])
@@ -93,7 +91,7 @@ def find_approximations(alpha, parameters, convergents):
 # Approximation details: q, p/q, notation, order, absolute difference
 def print_approximations(approximations):
     approximations.sort(key=lambda a: a[ABS_DIFF])
-    print(tabulate(approximations, headers=["q, p/q, p/q = [a0;...], order, abs_diff"], tablefmt="fancy_grid"))
+    print(tabulate(approximations, headers=["q", "p/q", "p/q = [a0;...]", "order", "abs_diff"], tablefmt="fancy_grid"))
 
 
 if __name__ == '__main__':
@@ -104,6 +102,9 @@ if __name__ == '__main__':
     print("Abbreviated notation of number " + str(parameters[0]) + ": " + str(abbreviated_notation))
 
     convergents = generate_convergents(abbreviated_notation)
-    approximations = find_approximations(parameters[0], parameters[1], convergents)
+    print("Convergents: ")
+    for c in convergents:
+        print(c)
 
+    approximations = find_approximations(parameters[0], parameters[1], convergents)
     print_approximations(approximations)
